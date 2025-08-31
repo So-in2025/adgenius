@@ -1,0 +1,15 @@
+{
+  "/_not-found": "app/_not-found.js",
+  "/api/generate-video/route": "app/api/generate-video/route.js",
+  "/api/auth/register/route": "app/api/auth/register/route.js",
+  "/api/generate/route": "app/api/generate/route.js",
+  "/api/sample-thumbnail/route": "app/api/sample-thumbnail/route.js",
+  "/api/placeholder-thumbnail/route": "app/api/placeholder-thumbnail/route.js",
+  "/api/sample-video/route": "app/api/sample-video/route.js",
+  "/api/webhooks/route": "app/api/webhooks/route.js",
+  "/api/videos/route": "app/api/videos/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/page": "app/page.js",
+  "/register/page": "app/register/page.js",
+  "/login/page": "app/login/page.js"
+}
