@@ -1,135 +1,99 @@
-'use client'
+'use client';
+import { useState } from 'react';
+import { createUser } from '@/lib/db';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
-import { auth, db } from '@/lib/firebase'
-
-export default function Register() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+export default function RegisterPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        formData.email, 
-        formData.password
-      )
+      // Hash de password simple (en producción usar bcrypt)
+      const passwordHash = btoa(password);
+      const user = await createUser(email, passwordHash);
       
-      const user = userCredential.user
-
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        name: formData.name,
-        email: formData.email,
-        credits: 3,
-        plan: 'free',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString()
-      })
-
-      router.push('/dashboard')
-
+      console.log('Usuario registrado:', user);
+      router.push('/dashboard');
     } catch (error: any) {
-      console.error('Error registro:', error)
-      setError(error.message || 'Error al crear la cuenta')
+      console.error('Error registro:', error);
+      setError(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="glass-card w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl text-white">🎁</span>
-          </div>
-          <h1 className="heading-2 mb-2">Comienza Gratis</h1>
-          <p className="text-text-secondary">3 generaciones gratis - Sin tarjeta</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Crear cuenta
+          </h2>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              {error}
+            </div>
+          )}
+          
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-3 text-text-primary">
-              Nombre completo
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="input-field"
-              placeholder="Tu nombre completo"
-              required
-            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              {loading ? 'Creando cuenta...' : 'Registrarse'}
+            </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-3 text-text-primary">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="input-field"
-              placeholder="tu@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-3 text-text-primary">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="input-field"
-              placeholder="Mínimo 6 caracteres"
-              required
-              minLength={6}
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="btn-primary w-full py-3 disabled:opacity-50"
-          >
-            {loading ? 'Creando cuenta...' : 'Crear Cuenta Gratis'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-text-secondary text-sm">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-primary hover:text-primary-dark font-semibold">
-              Iniciar sesión
+          <div className="text-center">
+            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              ¿Ya tienes cuenta? Inicia sesión
             </Link>
-          </p>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
-  )
+  );
 }
+
+export const dynamic = 'force-dynamic';
