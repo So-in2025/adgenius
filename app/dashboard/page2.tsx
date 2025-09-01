@@ -8,9 +8,10 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Verificar si el usuario está logueado
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/check');
+        const response = await fetch('/api/check-auth');
         const data = await response.json();
         
         if (response.ok) {
@@ -29,19 +30,6 @@ export default function DashboardPage() {
     checkAuth();
   }, [router]);
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  };
-
-  const handleGenerateVideo = () => {
-    router.push('/generate'); // ← NAVEGAR A GENERAR
-  };
-
-  const handleCreateNew = () => {
-    router.push('/generate'); // ← NAVEGAR A GENERAR
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -50,33 +38,27 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return null; // Redirección manejada por el useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="glass-card p-6 mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-2 text-gray-600">
-              Bienvenido de vuelta, {user.name} 👋
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-          >
-            Cerrar sesión
-          </button>
+        <div className="glass-card p-6 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">
+            Bienvenido de vuelta, {user.name} 👋
+          </p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[
-            { title: 'Videos Creados', value: '0', change: '+0' },
-            { title: 'Creditos Restantes', value: user.credits || '5', change: '+0' },
-            { title: 'Tasa de Conversión', value: '0%', change: '+0%' }
+            { title: 'Videos Creados', value: '12', change: '+3' },
+            { title: 'Creditos Restantes', value: '8', change: '-4' },
+            { title: 'Tasa de Conversión', value: '24%', change: '+8%' }
           ].map((stat, index) => (
             <div key={index} className="glass-card p-6 text-center">
               <h3 className="text-lg font-semibold text-gray-700">{stat.title}</h3>
@@ -102,10 +84,7 @@ export default function DashboardPage() {
                 <option>Estilo Creativo</option>
                 <option>Estilo Minimalista</option>
               </select>
-              <button 
-                onClick={handleGenerateVideo} // ← HANDLER AQUÍ
-                className="btn-primary w-full"
-              >
+              <button className="btn-primary w-full">
                 Generar Video
               </button>
             </div>
@@ -137,12 +116,7 @@ export default function DashboardPage() {
             <button className="btn-secondary">Ver Analytics</button>
             <button className="btn-secondary">Descargar Reporte</button>
             <button className="btn-secondary">Compartir Proyecto</button>
-            <button 
-              onClick={handleCreateNew} // ← HANDLER AQUÍ
-              className="btn-primary"
-            >
-              Crear Nuevo
-            </button>
+            <button className="btn-primary">Crear Nuevo</button>
           </div>
         </div>
       </div>

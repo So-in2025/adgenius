@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { createUser } from '@/lib/db';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,11 +17,19 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      // Hash de password simple (en producción usar bcrypt)
-      const passwordHash = btoa(password);
-      const user = await createUser(email, passwordHash);
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      const data = await response.json();
       
-      console.log('Usuario registrado:', user);
+      if (!response.ok) {
+        throw new Error(data.error || 'Error en registro');
+      }
+
+      console.log('Usuario registrado:', data.user);
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Error registro:', error);
@@ -33,20 +41,37 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 p-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-3xl font-bold text-center text-gray-900">
             Crear cuenta
           </h2>
+          <p className="mt-2 text-center text-gray-600">
+            Únete a AdGenius y comienza a crear
+          </p>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
           
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="space-y-4">
+            <div>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nombre completo"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div>
               <input
                 id="email-address"
@@ -54,7 +79,7 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -65,9 +90,9 @@ export default function RegisterPage() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -79,14 +104,14 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Creando cuenta...' : 'Registrarse'}
+              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </div>
 
           <div className="text-center">
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
               ¿Ya tienes cuenta? Inicia sesión
             </Link>
           </div>
@@ -95,5 +120,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-export const dynamic = 'force-dynamic';

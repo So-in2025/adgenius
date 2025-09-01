@@ -301,3 +301,24 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-dark);
 }
+
+/* Agregar estas clases */
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+.step-item {
+  transition: all 0.3s ease;
+}
+
+.step-item.completed {
+  border-left: 4px solid #10b981;
+}
+
+.step-item.processing {
+  border-left: 4px solid #3b82f6;
+}
+
+.step-item.pending {
+  border-left: 4px solid #d1d5db;
+}
